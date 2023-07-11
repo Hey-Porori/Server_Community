@@ -1,0 +1,22 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  # file upload max size
+  servlet:
+    multipart:
+      maxFileSize: 5MB
+      maxRequestSize: 10MB
+
+  config:
+    activate:
+      on-profile: local
+    import: application-secret.yml
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
