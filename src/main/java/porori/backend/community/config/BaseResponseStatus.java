@@ -13,11 +13,12 @@ public enum BaseResponseStatus {
     /**
      * 2000 : Request 오류
      */
-
+    TOKEN_ERROR(false, 2000, "유효한 토큰이 아닙니다."),
 
     /**
      * 3000 : Response 오류
      */
+    JSON_ERROR(false, 3000, "유효한 JSON 형식이 아닙니다."),
 
 
     /**

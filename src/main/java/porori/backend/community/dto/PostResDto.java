@@ -16,4 +16,14 @@ public class PostResDto {
             this.postId = post.getPostId();
         }
     }
+
+    @Getter
+    public static class PreSignedUrlRes{
+        private String url;
+
+        @Builder
+        public PreSignedUrlRes(String url) {
+            this.url = url;
+        }
+    }
 }
