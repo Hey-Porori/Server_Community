@@ -4,20 +4,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import porori.backend.community.config.BaseException;
+import porori.backend.community.config.exception.user.TokenException;
+import porori.backend.community.config.exception.user.JsonException;
 import porori.backend.community.dto.UserReqDto;
 
-import static porori.backend.community.config.BaseResponseStatus.JSON_ERROR;
-import static porori.backend.community.config.BaseResponseStatus.TOKEN_ERROR;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final WebClient webClient;
+    private static final String LOG_FORMAT = "Method : {}";
 
-    public Long getUserId(String token) throws BaseException {
+    public Long getUserId(String token) {
         String[] splitToken = token.split(" ");
 
         UserReqDto.AccessTokenReq accessTokenReq = UserReqDto.AccessTokenReq.builder()
@@ -29,20 +30,24 @@ public class UserService {
     }
 
     //(테스트) 토큰 유효성 검증
-    public boolean validationToken(String token) throws BaseException {
+    public boolean validationToken(String token) {
 
-        String response = tokenValidationRequest(token);
-        JsonElement jsonElement = JsonParser.parseString(response);
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        try {
+            String response = tokenValidationRequest(token);
+            JsonElement jsonElement = JsonParser.parseString(response);
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
 
-        int code = jsonObject.get("statusCode").getAsInt();
-        System.out.println(code);
+            int code = jsonObject.get("statusCode").getAsInt();
 
-        return code == 200;
+            return code == 200;
+        } catch (Exception e) {
+            log.warn(LOG_FORMAT, "validation Token");
+            throw new TokenException();
+        }
 
     }
 
-    private String sendTokenMeRequest(String token, UserReqDto.AccessTokenReq accessTokenReq) throws BaseException {
+    private String sendTokenMeRequest(String token, UserReqDto.AccessTokenReq accessTokenReq) {
         try {
             return webClient.post()
                     .uri("/token/me")
@@ -52,33 +57,33 @@ public class UserService {
                     .bodyToMono(String.class)
                     .block();
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new BaseException(TOKEN_ERROR);
+            log.warn(LOG_FORMAT, "sendTokenMeRequest");
+            throw new TokenException();
         }
     }
 
-    private String tokenValidationRequest(String token) throws BaseException {
-        try{
-            return  webClient.post()
+    private String tokenValidationRequest(String token) {
+        try {
+            return webClient.post()
                     .uri("/test/jwt")
                     .header("Authorization", token)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new BaseException(TOKEN_ERROR);
+        } catch (Exception e) {
+            log.warn(LOG_FORMAT, "tokenValidationRequest");
+            throw new TokenException();
         }
     }
 
-    private Long extractUserIdFromResponse(String response) throws BaseException {
+    private Long extractUserIdFromResponse(String response) {
         try {
             JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
             JsonObject data = jsonObject.getAsJsonObject("data");
             return data.get("userId").getAsLong();
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new BaseException(JSON_ERROR);
+            log.warn(LOG_FORMAT, "extractUserIdFromResponse");
+            throw new JsonException();
         }
     }
 
