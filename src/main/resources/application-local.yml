@@ -8,6 +8,10 @@ spring:
       on-profile: local
     import: application-secret.yml
 
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
 server:
   servlet:
     encoding:
