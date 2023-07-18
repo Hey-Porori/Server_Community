@@ -24,7 +24,7 @@ public class PostAttach extends BaseTimeEntity {
     @JoinColumn(name = "post_id")
     private Post postId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "image_name", nullable = false, columnDefinition = "TEXT")
     private String imageName;
 
     @Builder

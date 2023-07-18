@@ -4,26 +4,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import porori.backend.community.domain.Post;
 import porori.backend.community.domain.PostAttach;
-import porori.backend.community.repository.PostAttachRepository;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class PostAttachService {
-    private final PostAttachRepository postAttachRepository;
 
-    public void saveAttach(Post post, List<String> imageNameList){
+    public List<PostAttach> saveAttach(Post post, List<String> imageNameList){
+        List<PostAttach> imageList = new ArrayList<>();
         //첨부파일 저장
         for(String imageName: imageNameList){
             PostAttach postAttach = PostAttach.builder()
                     .postId(post)
                     .imageName(imageName)
                     .build();
-            postAttachRepository.save(postAttach);
+            imageList.add(postAttach);
         }
-
+        return imageList;
     }
 }
