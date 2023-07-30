@@ -19,12 +19,17 @@ import java.util.UUID;
 @Transactional
 public class AmazonS3Service {
     private final AmazonS3 amazonS3;
+    private final UserService userService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
 
-    public PostResDto.PreSignedUrlRes getPreSignedUrl(){
+    public PostResDto.PreSignedUrlRes getPreSignedUrl(String token){
+        //토큰 유효 확인
+        userService.tokenValidationRequest(token);
+
+
         String uuid = UUID.randomUUID().toString();
         String objectKey = "communities/"+uuid;
 
