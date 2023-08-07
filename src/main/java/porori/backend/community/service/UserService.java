@@ -1,14 +1,14 @@
 package porori.backend.community.service;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import porori.backend.community.config.BaseResponse;
 import porori.backend.community.config.exception.user.TokenException;
-import porori.backend.community.config.exception.user.JsonException;
+import porori.backend.community.config.exception.user.UserBadGateWayException;
+import porori.backend.community.domain.user.UserInfo;
 import porori.backend.community.dto.UserReqDto;
 
 @Slf4j
@@ -25,65 +25,39 @@ public class UserService {
                 .accessToken(splitToken[1])
                 .build();
 
-        String response = sendTokenMeRequest(token, accessTokenReq);
-        return extractUserIdFromResponse(response);
+        return sendTokenMeRequest(token, accessTokenReq).getUserId();
     }
 
-    //(테스트) 토큰 유효성 검증
-    public boolean validationToken(String token) {
-
-        try {
-            String response = tokenValidationRequest(token);
-            JsonElement jsonElement = JsonParser.parseString(response);
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-            int code = jsonObject.get("statusCode").getAsInt();
-
-            return code == 200;
-        } catch (Exception e) {
-            log.warn(LOG_FORMAT, "validation Token");
-            throw new TokenException();
-        }
-
-    }
-
-    private String sendTokenMeRequest(String token, UserReqDto.AccessTokenReq accessTokenReq) {
-        try {
+    private UserInfo sendTokenMeRequest(String token, UserReqDto.AccessTokenReq accessTokenReq) {
             return webClient.post()
                     .uri("/token/me")
                     .header("Authorization", token)
                     .bodyValue(accessTokenReq)
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono((new ParameterizedTypeReference<BaseResponse<UserInfo>>() {
+                    }))
+                    .map(response->{
+                        if (response.getStatusCode() == 200) {
+                            return response.getData();
+                        } else {
+                            throw new UserBadGateWayException();
+                        }
+                    })
                     .block();
-        } catch (Exception e) {
-            log.warn(LOG_FORMAT, "sendTokenMeRequest");
-            throw new TokenException();
-        }
     }
 
-    private String tokenValidationRequest(String token) {
+    //(테스트) 토큰 유효성 검증
+    public void tokenValidationRequest(String token) {
         try {
-            return webClient.post()
+            webClient.post()
                     .uri("/test/jwt")
                     .header("Authorization", token)
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .toBodilessEntity()
                     .block();
-        } catch (Exception e) {
+        } catch (Exception e){
             log.warn(LOG_FORMAT, "tokenValidationRequest");
             throw new TokenException();
-        }
-    }
-
-    private Long extractUserIdFromResponse(String response) {
-        try {
-            JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
-            JsonObject data = jsonObject.getAsJsonObject("data");
-            return data.get("userId").getAsLong();
-        } catch (Exception e) {
-            log.warn(LOG_FORMAT, "extractUserIdFromResponse");
-            throw new JsonException();
         }
     }
 
