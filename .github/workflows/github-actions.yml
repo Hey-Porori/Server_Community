@@ -44,7 +44,8 @@ jobs:
           cd ./src/main/resources
           touch ./application-secret.yml 
           echo "${{env.APPLICATION_SECRET}}" > ./application-secret.yml
-
+    
+    - name: Upload application-secret.yml artifact
     - uses: actions/upload-artifact@v2
       with:
         name: application-secret.yml
@@ -74,7 +75,7 @@ jobs:
     - name: Deploy
       uses: appleboy/ssh-action@master
       with:
-          host: ${{ secrets.EC2_SERVER_HOST }}
+          host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.PRIVATE_KEY }}
           envs: GITHUB_SHA
