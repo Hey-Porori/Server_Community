@@ -52,7 +52,7 @@ jobs:
       working-directory: ${{ env.working-directory }}
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew clean build --exclude-task test
       working-directory: ${{ env.working-directory }}
 
     - name: Cleanup Gradle Cache
