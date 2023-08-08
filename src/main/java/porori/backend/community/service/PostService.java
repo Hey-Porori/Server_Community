@@ -9,7 +9,7 @@ import porori.backend.community.domain.PostTag;
 import porori.backend.community.domain.Tag;
 import porori.backend.community.dto.PostReqDto;
 import porori.backend.community.dto.PostResDto;
-import porori.backend.community.repository.PostRepository;
+import porori.backend.community.repository.*;
 
 import javax.transaction.Transactional;
 
@@ -26,9 +26,14 @@ public class PostService {
     private final PostAttachService postAttachService;
     private final TagService tagService;
     private final PostTagService postTagService;
+    private final UserService userService;
 
 
-    public PostResDto.PostContentRes createPost(Long userId, PostReqDto.PostContentReq postContent) {
+    public PostResDto.PostContentRes createPost(String token, PostReqDto.PostContentReq postContent) {
+        //토큰 유효 확인
+        userService.sendTestJwtRequest(token);
+
+        Long userId = userService.getUserId(token);
 
         //Post 생성
         Post postEntity = Post.builder()
