@@ -8,8 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import porori.backend.community.config.BaseResponse;
 import porori.backend.community.config.exception.user.TokenException;
 import porori.backend.community.config.exception.user.UserBadGateWayException;
-import porori.backend.community.domain.user.UserInfo;
-import porori.backend.community.dto.UserReqDto;
+import porori.backend.community.dto.UserResDto.UserInfo;
+import porori.backend.community.dto.UserReqDto.AccessTokenReq;
 
 @Slf4j
 @Service
@@ -21,14 +21,14 @@ public class UserService {
     public Long getUserId(String token) {
         String[] splitToken = token.split(" ");
 
-        UserReqDto.AccessTokenReq accessTokenReq = UserReqDto.AccessTokenReq.builder()
+        AccessTokenReq accessTokenReq = AccessTokenReq.builder()
                 .accessToken(splitToken[1])
                 .build();
 
         return sendTokenMeRequest(token, accessTokenReq).getUserId();
     }
 
-    private UserInfo sendTokenMeRequest(String token, UserReqDto.AccessTokenReq accessTokenReq) {
+    private UserInfo sendTokenMeRequest(String token, AccessTokenReq accessTokenReq) {
             return webClient.post()
                     .uri("/token/me")
                     .header("Authorization", token)
@@ -47,7 +47,7 @@ public class UserService {
     }
 
     //(테스트) 토큰 유효성 검증
-    public void tokenValidationRequest(String token) {
+    public void sendTestJwtRequest(String token) {
         try {
             webClient.post()
                     .uri("/test/jwt")
@@ -56,7 +56,7 @@ public class UserService {
                     .toBodilessEntity()
                     .block();
         } catch (Exception e){
-            log.warn(LOG_FORMAT, "tokenValidationRequest");
+            log.warn(LOG_FORMAT, "sendTestJwtRequest");
             throw new TokenException();
         }
     }

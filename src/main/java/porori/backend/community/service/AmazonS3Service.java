@@ -27,7 +27,7 @@ public class AmazonS3Service {
 
     public PostResDto.PreSignedUrlRes getPreSignedUrl(String token){
         //토큰 유효 확인
-        userService.tokenValidationRequest(token);
+        userService.sendTestJwtRequest(token);
 
 
         String uuid = UUID.randomUUID().toString();
