@@ -36,16 +36,16 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    - name: Create application-secret.yml
+    - name: Create application.yml
       run: |
         mkdir -p ./src/main/resources
-        echo "${APPLICATION}" > ./src/main/resources/application-secret.yml
+        echo "${APPLICATION}" > ./src/main/resources/application.yml
 
-    - name: Upload application-secret.yml artifact
+    - name: Upload application.yml artifact
       uses: actions/upload-artifact@v2
       with:
-        name: application-secret.yml
-        path: ./src/main/resources/application-secret.yml
+        name: application.yml
+        path: ./src/main/resources/application.yml
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
