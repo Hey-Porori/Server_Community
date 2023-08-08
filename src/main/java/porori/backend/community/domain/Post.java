@@ -3,6 +3,7 @@ package porori.backend.community.domain;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import porori.backend.community.domain.core.BaseTimeEntity;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "post")
 @DynamicInsert
+@DynamicUpdate
 public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +41,10 @@ public class Post extends BaseTimeEntity {
     @ColumnDefault("'ACTIVE'")
     private String status;
 
-    @OneToMany(mappedBy = "attachId", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "postId", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<PostAttach> imageList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "postTagId", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "postId", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<PostTag> tagList = new ArrayList<>();
 
     @Builder

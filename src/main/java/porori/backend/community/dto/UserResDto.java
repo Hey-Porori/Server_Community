@@ -24,5 +24,16 @@ public class UserResDto {
         private String imageUrl;
     }
 
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CommunityUserInfo{
+        private Long userId;
+        private String nickname;
+        private String image;
+        private String backgroundColor;
+    }
+
 
 }

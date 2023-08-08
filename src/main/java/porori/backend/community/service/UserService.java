@@ -8,8 +8,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import porori.backend.community.config.BaseResponse;
 import porori.backend.community.config.exception.user.TokenException;
 import porori.backend.community.config.exception.user.UserBadGateWayException;
+import porori.backend.community.dto.UserReqDto.UserIdListReq;
 import porori.backend.community.dto.UserResDto.UserInfo;
+import porori.backend.community.dto.UserResDto.CommunityUserInfo;
 import porori.backend.community.dto.UserReqDto.AccessTokenReq;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -59,6 +64,25 @@ public class UserService {
             log.warn(LOG_FORMAT, "sendTestJwtRequest");
             throw new TokenException();
         }
+    }
+
+    public List<CommunityUserInfo> sendCommunitiesInfoRequest(String token, UserIdListReq userIdList) {
+        return webClient.post()
+                .uri("/communities/info")
+                .header("Authorization", token)
+                .bodyValue(userIdList)
+                .retrieve()
+                .bodyToMono((new ParameterizedTypeReference<BaseResponse<Map<String, List<CommunityUserInfo>>>>() {
+                }))
+                .map(response->{
+                    if (response.getStatusCode() == 200) {
+                        log.warn("communityUserInfoBlocks : {}", "완");
+                        return response.getData().get("communityUserInfoBlocks");
+                    } else {
+                        throw new UserBadGateWayException();
+                    }
+                })
+                .block();
     }
 
 }
