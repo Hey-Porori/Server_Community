@@ -3,10 +3,8 @@ package porori.backend.community.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import porori.backend.community.domain.Post;
-import porori.backend.community.domain.PostAttach;
-import porori.backend.community.domain.PostTag;
-import porori.backend.community.domain.Tag;
+import porori.backend.community.domain.*;
+import porori.backend.community.dto.CommentResDto;
 import porori.backend.community.dto.PostReqDto;
 import porori.backend.community.dto.PostResDto;
 import porori.backend.community.dto.UserReqDto;
@@ -30,6 +28,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class PostService {
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     private final PostAttachService postAttachService;
     private final TagService tagService;
@@ -76,13 +75,15 @@ public class PostService {
 
         LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
         //주변 게시글 목록 가져오기
-        List<Post> nearByPosts = postRepository.findNearByPosts(currentLocation.getLatitude(), currentLocation.getLongitude(), yesterday);
+        List<Post> nearByPosts = postRepository.findNearByPosts(currentLocation.getLatitude(),
+                currentLocation.getLongitude(), yesterday);
 
         //주변 게시글 목록에서 userId 추출
         List<Long> userIdList = nearByPosts.stream().map(Post::getUserId).collect(Collectors.toList());
 
         //userId로 communityUser 정보 가져오기
-        List<CommunityUserInfo> userInfoBlocks = userService.sendCommunitiesInfoRequest(token, UserReqDto.UserIdListReq.builder().userIdList(userIdList).build());
+        List<CommunityUserInfo> userInfoBlocks = userService.sendCommunitiesInfoRequest(token,
+                UserReqDto.UserIdListReq.builder().userIdList(userIdList).build());
 
         HashMap<Long, CommunityUserInfo> communityUserInfoHashMap = new HashMap<>();
         userInfoBlocks.forEach(communityUserInfo -> {
@@ -109,15 +110,19 @@ public class PostService {
 
         //postId로 게시글 목록 가져오기
         List<Post> postsOnSwipe = new ArrayList<>();
-        postIdList.forEach(postId->{
-            postsOnSwipe.add(postRepository.findByPostIdAndStatusWithImageList(postId).orElseThrow(NotFoundPostIdException::new));
+        postIdList.forEach(postId -> {
+            postsOnSwipe.add
+                    (postRepository.findByPostIdAndStatusWithImageList(postId)
+                            .orElseThrow(NotFoundPostIdException::new)
+                    );
         });
 
         //게시글 목록에서 userId 추출
         List<Long> userIdList = postsOnSwipe.stream().map(Post::getUserId).collect(Collectors.toList());
 
         //userId로 communityUser 정보 가져오기
-        List<CommunityUserInfo> userInfoBlocks = userService.sendCommunitiesInfoRequest(token, UserReqDto.UserIdListReq.builder().userIdList(userIdList).build());
+        List<CommunityUserInfo> userInfoBlocks = userService.sendCommunitiesInfoRequest(token,
+                UserReqDto.UserIdListReq.builder().userIdList(userIdList).build());
 
         HashMap<Long, CommunityUserInfo> communityUserInfoHashMap = new HashMap<>();
         userInfoBlocks.forEach(communityUserInfo -> {
@@ -130,6 +135,40 @@ public class PostService {
                         .user(communityUserInfoHashMap.get(post.getUserId()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    //게시글 상세보기
+    public PostResDto.PostDetailRes getPostDetail(String token, Long postId) {
+        Post post = postRepository.findByPostIdAndStatus(postId, "ACTIVE")
+                .orElseThrow(NotFoundPostIdException::new);
+
+        List<CommunityUserInfo> userInfoBlock = userService.sendCommunitiesInfoRequest(token,
+                UserReqDto.UserIdListReq.builder().userIdList(Collections.singletonList(post.getUserId())).build());
+
+        List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAt(post);
+
+        List<Long> userIdList = commentList.stream().map(Comment::getUserId).collect(Collectors.toList());
+
+        List<CommunityUserInfo> commentUserInfoBlocks = userService.sendCommunitiesInfoRequest(token,
+                UserReqDto.UserIdListReq.builder().userIdList(userIdList).build());
+
+        HashMap<Long, CommunityUserInfo> commentUserInfoHashMap = new HashMap<>();
+        commentUserInfoBlocks.forEach(communityUserInfo -> {
+            commentUserInfoHashMap.put(communityUserInfo.getUserId(), communityUserInfo);
+        });
+
+        List<CommentResDto.CommentDetailRes> commentDetailList = commentList.stream().map(comment ->
+                CommentResDto.CommentDetailRes.builder()
+                        .comment(comment)
+                        .userInfo(commentUserInfoHashMap.get(comment.getUserId()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return PostResDto.PostDetailRes.builder()
+                .post(post)
+                .user(userInfoBlock.get(0))
+                .commentList(commentDetailList)
+                .build();
     }
 
 }

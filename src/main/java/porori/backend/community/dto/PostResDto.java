@@ -76,4 +76,34 @@ public class PostResDto {
         }
     }
 
+    @Getter
+    public static class PostDetailRes {
+        private String title;
+        private String content;
+        private Double latitude;
+        private Double longitude;
+        private List<String> tagList;
+        private List<String> imageList;
+        private LocalDateTime createdAt;
+        private String nickName;
+        private String imageUrl;
+        private String backgroundColor;
+        private List<CommentResDto.CommentDetailRes> commentList;
+
+        @Builder
+        public PostDetailRes(Post post, CommunityUserInfo user, List<CommentResDto.CommentDetailRes> commentList) {
+            this.title = post.getTitle();
+            this.content = post.getContent();
+            this.latitude = post.getLatitude();
+            this.longitude = post.getLongitude();
+            this.tagList = post.getTagList().stream().map((postTag) -> postTag.getTagId().getName()).collect(Collectors.toList());
+            this.imageList = post.getImageList().stream().map(PostAttach::getImageName).collect(Collectors.toList());
+            this.createdAt = post.getCreatedAt();
+            this.nickName = user.getNickname();
+            this.imageUrl = user.getImage();
+            this.backgroundColor = user.getBackgroundColor();
+            this.commentList = commentList;
+        }
+    }
+
 }
