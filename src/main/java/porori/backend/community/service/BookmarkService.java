@@ -8,7 +8,7 @@ import porori.backend.community.config.exception.bookmark.MyPostException;
 import porori.backend.community.config.exception.post.NotFoundPostIdException;
 import porori.backend.community.domain.Bookmark;
 import porori.backend.community.domain.Post;
-import porori.backend.community.dto.PostResDto;
+import porori.backend.community.dto.PostResDto.*;
 import porori.backend.community.repository.BookmarkRepository;
 import porori.backend.community.repository.PostRepository;
 
@@ -26,7 +26,7 @@ public class BookmarkService {
 
     private final UserService userService;
 
-    public PostResDto.PostContentRes createBookmark(String token, Long postId){
+    public PostContentRes createBookmark(String token, Long postId){
         //토큰 유효 확인
         userService.sendTestJwtRequest(token);
 
@@ -48,7 +48,7 @@ public class BookmarkService {
                 .postId(post)
                 .build());
 
-        return new PostResDto.PostContentRes(post);
+        return new PostContentRes(post);
 
     }
 }

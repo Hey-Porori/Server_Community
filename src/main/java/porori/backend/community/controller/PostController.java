@@ -45,4 +45,10 @@ public class PostController {
         return new BaseResponse<>(postService.getPostsOnSwipe(token, postIdList.getPostIdList()));
     }
 
+    @Operation(summary = "게시글 상세 보기", description = "postId로 게시글을 조회합니다.")
+    @GetMapping("/post/{postId}")
+    public BaseResponse<PostResDto.PostDetailRes> getPostDetail(@RequestHeader("Authorization") String token, @PathVariable Long postId){
+        return new BaseResponse<>(postService.getPostDetail(token, postId));
+    }
+
 }
