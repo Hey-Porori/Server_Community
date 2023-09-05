@@ -88,10 +88,10 @@ public class PostResDto {
         private String nickName;
         private String imageUrl;
         private String backgroundColor;
-        private List<CommentResDto.CommentDetailRes> commentList;
+
 
         @Builder
-        public PostDetailRes(Post post, CommunityUserInfo user, List<CommentResDto.CommentDetailRes> commentList) {
+        public PostDetailRes(Post post, CommunityUserInfo user) {
             this.title = post.getTitle();
             this.content = post.getContent();
             this.latitude = post.getLatitude();
@@ -102,7 +102,6 @@ public class PostResDto {
             this.nickName = user.getNickname();
             this.imageUrl = user.getImage();
             this.backgroundColor = user.getBackgroundColor();
-            this.commentList = commentList;
         }
     }
 

@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import porori.backend.community.config.BaseResponse;
 import porori.backend.community.config.exception.user.TokenException;
 import porori.backend.community.config.exception.user.UserBadGateWayException;
-import porori.backend.community.dto.UserReqDto.UserIdListReq;
 import porori.backend.community.dto.UserResDto.UserInfo;
 import porori.backend.community.dto.UserResDto.CommunityUserInfo;
 import reactor.core.publisher.Mono;
@@ -30,16 +29,16 @@ public class UserService {
     }
 
     private UserInfo sendTokenMeRequest(String token) {
-            return webClient.get()
-                    .uri("/token/me")
-                    .header("Authorization", token)
-                    .retrieve()
-                    .onStatus(HttpStatus::is4xxClientError, clientResponse -> Mono.error(new TokenException()))
-                    .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new UserBadGateWayException()))
-                    .bodyToMono((new ParameterizedTypeReference<BaseResponse<UserInfo>>() {
-                    }))
-                    .map(BaseResponse::getData)
-                    .block();
+        return webClient.get()
+                .uri("/token/me")
+                .header("Authorization", token)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, clientResponse -> Mono.error(new TokenException()))
+                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new UserBadGateWayException()))
+                .bodyToMono((new ParameterizedTypeReference<BaseResponse<UserInfo>>() {
+                }))
+                .map(BaseResponse::getData)
+                .block();
     }
 
     //(테스트) 토큰 유효성 검증
@@ -51,14 +50,14 @@ public class UserService {
                     .retrieve()
                     .toBodilessEntity()
                     .block();
-        } catch (Exception e){
+        } catch (Exception e) {
             log.warn(LOG_FORMAT, "sendTestJwtRequest");
             throw new TokenException();
         }
     }
 
-    public List<CommunityUserInfo> sendCommunitiesInfoRequest(String token, UserIdListReq userIdList) {
-        String param = userIdList.getUserIdList().stream()
+    public List<CommunityUserInfo> sendCommunitiesInfoRequest(String token, List<Long> userIdList) {
+        String param = userIdList.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
         log.warn(LOG_FORMAT, param);
@@ -71,7 +70,7 @@ public class UserService {
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new UserBadGateWayException()))
                 .bodyToMono((new ParameterizedTypeReference<BaseResponse<Map<String, List<CommunityUserInfo>>>>() {
                 }))
-                .map(response->response.getData().get("communityUserInfoBlocks"))
+                .map(response -> response.getData().get("communityUserInfoBlocks"))
                 .block();
     }
 
