@@ -153,7 +153,7 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page-1, 10);
         Page<Post> pagedPost = postRepository.findAllByUserIdOrderByPostIdDesc(userId, pageRequest);
         pagedPost.forEach(post -> {
-            Long bookmarkCnt = bookmarkRepository.countByPostIdAndUserId(post, userId);
+            Long bookmarkCnt = bookmarkRepository.countByPostId(post);
             Long commentCnt = commentRepository.countByPostIdAndUserId(post, userId);
             previewList.add(MyPostPreview.builder().post(post).bookmarkCnt(bookmarkCnt).commentCnt(commentCnt).build());
         });
