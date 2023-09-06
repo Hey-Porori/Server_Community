@@ -2,6 +2,8 @@ package porori.backend.community.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import porori.backend.community.domain.*;
 import porori.backend.community.dto.PostReqDto.*;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class PostService {
     private final PostRepository postRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final CommentRepository commentRepository;
 
     private final PostAttachService postAttachService;
     private final TagService tagService;
@@ -43,6 +47,7 @@ public class PostService {
         Post postEntity = Post.builder()
                 .title(postContent.getTitle())
                 .content(postContent.getContent())
+                .location(postContent.getLocation())
                 .latitude(postContent.getLatitude())
                 .longitude(postContent.getLongitude())
                 .userId(userId)
@@ -134,6 +139,26 @@ public class PostService {
                 token, Collections.singletonList(post.getUserId()));
 
         return PostDetailRes.builder().post(post).user(userInfoBlock.get(0)).build();
+    }
+
+    //내 게시글 목록 보기
+    public MyPostListRes getMyPostList(String token, int page){
+        //토큰 유효 확인
+        userService.sendTestJwtRequest(token);
+
+        Long userId = userService.getUserId(token);
+
+        ArrayList<MyPostPreview> previewList = new ArrayList<>();
+        //페이징 10개씩
+        PageRequest pageRequest = PageRequest.of(page-1, 10);
+        Page<Post> pagedPost = postRepository.findAllByUserIdOrderByPostIdDesc(userId, pageRequest);
+        pagedPost.forEach(post -> {
+            Long bookmarkCnt = bookmarkRepository.countByPostIdAndUserId(post, userId);
+            Long commentCnt = commentRepository.countByPostIdAndUserId(post, userId);
+            previewList.add(MyPostPreview.builder().post(post).bookmarkCnt(bookmarkCnt).commentCnt(commentCnt).build());
+        });
+
+        return MyPostListRes.builder().previewList(previewList).totalPage(pagedPost.getTotalPages()).build();
     }
 
 }

@@ -51,4 +51,10 @@ public class PostController {
         return new BaseResponse<>(postService.getPostDetail(token, postId));
     }
 
+    @Operation(summary = "내 게시글 목록 보기", description = "postId로 게시글을 조회합니다.")
+    @GetMapping("/post/my/{page}")
+    public BaseResponse<PostResDto.MyPostListRes> getMyPostList(@RequestHeader("Authorization") String token, @PathVariable int page){
+        return new BaseResponse<>(postService.getMyPostList(token, page));
+    }
+
 }

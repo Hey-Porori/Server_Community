@@ -11,6 +11,7 @@ public class PostReqDto {
     public static class PostContentReq {
         private String title;
         private String content;
+        private String location;
         private Double latitude;
         private Double longitude;
         private List<String> imageNameList;

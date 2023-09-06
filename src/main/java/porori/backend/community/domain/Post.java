@@ -33,6 +33,9 @@ public class Post extends BaseTimeEntity {
     private String content;
 
     @Column(nullable = false)
+    private String location;  //위, 경도 좌표의 주소(ex. 서울특별시 중구 필동로 1길 or 서울특별시 중구 필동 등 도로명 주소나 지번 주소 중 하나로 통일)
+
+    @Column(nullable = false)
     private Double latitude;
 
     @Column(nullable = false)
@@ -48,10 +51,11 @@ public class Post extends BaseTimeEntity {
     private List<PostTag> tagList = new ArrayList<>();
 
     @Builder
-    public Post(Long userId, String title, String content, Double latitude, Double longitude, String status, List<PostAttach> imageList, List<PostTag> tagList) {
+    public Post(Long userId, String title, String content, String location, Double latitude, Double longitude, String status, List<PostAttach> imageList, List<PostTag> tagList) {
         this.userId = userId;
         this.title = title;
         this.content = content;
+        this.location = location;
         this.latitude = latitude;
         this.longitude = longitude;
         this.status = status;
