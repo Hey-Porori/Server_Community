@@ -105,16 +105,16 @@ public class PostResDto {
 
     @Getter
     @Builder
-    public static class MyPostListRes{
+    public static class PostPreviewListRes {
         //페이징 처리
         //제목, 내용, 위치, 북마크 수 , 댓글 수, 게시글 작성 시간, 1번 이미지
         int totalPage;
-        List<MyPostPreview> previewList;
+        List<PostPreview> previewList;
 
     }
 
     @Getter
-    public static class MyPostPreview{
+    public static class PostPreview {
         private Long postId;
         private String title;
         private String content;
@@ -125,7 +125,7 @@ public class PostResDto {
         private LocalDateTime createdAt;
 
         @Builder
-        public MyPostPreview(Post post, Long bookmarkCnt, Long commentCnt){
+        public PostPreview(Post post, Long bookmarkCnt, Long commentCnt){
             this.postId = post.getPostId();
             this.title = post.getTitle();
             this.content = post.getContent();

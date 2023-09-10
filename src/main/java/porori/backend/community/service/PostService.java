@@ -133,20 +133,20 @@ public class PostService {
     }
 
     //내 게시글 목록 보기
-    public MyPostListRes getMyPostList(String token, int page){
+    public PostPreviewListRes getMyPostList(String token, int page){
         Long userId = userService.getUserId(token);
 
-        ArrayList<MyPostPreview> previewList = new ArrayList<>();
+        ArrayList<PostPreview> previewList = new ArrayList<>();
         //페이징 10개씩
         PageRequest pageRequest = PageRequest.of(page-1, 10);
         Page<Post> pagedPost = postRepository.findAllByUserIdOrderByPostIdDesc(userId, pageRequest);
         pagedPost.forEach(post -> {
             Long bookmarkCnt = bookmarkRepository.countByPostId(post);
             Long commentCnt = commentRepository.countByPostIdAndUserId(post, userId);
-            previewList.add(MyPostPreview.builder().post(post).bookmarkCnt(bookmarkCnt).commentCnt(commentCnt).build());
+            previewList.add(PostPreview.builder().post(post).bookmarkCnt(bookmarkCnt).commentCnt(commentCnt).build());
         });
 
-        return MyPostListRes.builder().previewList(previewList).totalPage(pagedPost.getTotalPages()).build();
+        return PostPreviewListRes.builder().previewList(previewList).totalPage(pagedPost.getTotalPages()).build();
     }
 
 }
