@@ -38,9 +38,6 @@ public class PostService {
 
 
     public PostContentRes createPost(String token, PostContentReq postContent) {
-        //토큰 유효 확인
-        userService.sendTestJwtRequest(token);
-
         Long userId = userService.getUserId(token);
 
         //Post 생성
@@ -72,9 +69,6 @@ public class PostService {
 
     //게시글 지도에서 보기
     public List<PostOnMapRes> getPostsOnMap(String token, CurrentLocationReq currentLocation) {
-        //토큰 유효 확인
-        userService.sendTestJwtRequest(token);
-
         LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
         //주변 게시글 목록 가져오기
         List<Post> nearByPosts = postRepository.findNearByPosts(
@@ -105,9 +99,6 @@ public class PostService {
 
     //게시글 스와이프 보기
     public List<PostSwipeRes> getPostsOnSwipe(String token, List<Long> postIdList) {
-        //토큰 유효 확인
-        userService.sendTestJwtRequest(token);
-
         //postId로 게시글 목록 가져오기
         List<Post> postsOnSwipe = new ArrayList<>();
         postIdList.forEach(postId -> {
@@ -143,9 +134,6 @@ public class PostService {
 
     //내 게시글 목록 보기
     public MyPostListRes getMyPostList(String token, int page){
-        //토큰 유효 확인
-        userService.sendTestJwtRequest(token);
-
         Long userId = userService.getUserId(token);
 
         ArrayList<MyPostPreview> previewList = new ArrayList<>();
