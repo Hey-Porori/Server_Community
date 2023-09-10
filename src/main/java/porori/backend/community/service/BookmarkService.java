@@ -27,9 +27,6 @@ public class BookmarkService {
     private final UserService userService;
 
     public PostContentRes createBookmark(String token, Long postId){
-        //토큰 유효 확인
-        userService.sendTestJwtRequest(token);
-
         Post post = postRepository.findByPostIdAndStatus(postId, "ACTIVE").orElseThrow(NotFoundPostIdException::new);
 
         //자기 게시글 확인
