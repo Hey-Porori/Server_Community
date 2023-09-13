@@ -5,6 +5,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import porori.backend.community.domain.core.BaseTimeEntity;
+import porori.backend.community.dto.PostReqDto.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -65,5 +66,14 @@ public class Post extends BaseTimeEntity {
 
     public void changeStatus(String newStatus) {
         this.status = newStatus;
+    }
+
+    public void editPost(EditPostContentReq editPostContent){
+        this.title = editPostContent.getTitle();
+        this.content = editPostContent.getContent();
+    }
+
+    public void deletePost(){
+        this.status = "DELETE";
     }
 }

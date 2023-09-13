@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import porori.backend.community.config.exception.post.NotMyPostException;
 import porori.backend.community.domain.*;
 import porori.backend.community.dto.PostReqDto.*;
 import porori.backend.community.dto.PostResDto.*;
@@ -133,13 +134,13 @@ public class PostService {
     }
 
     //내 게시글 목록 보기
-    public PostPreviewListRes getMyPostList(String token, int page){
+    public PostPreviewListRes getMyPostList(String token, int page) {
         Long userId = userService.getUserId(token);
 
         ArrayList<PostPreview> previewList = new ArrayList<>();
         //페이징 10개씩
-        PageRequest pageRequest = PageRequest.of(page-1, 10);
-        Page<Post> pagedPost = postRepository.findAllByUserIdOrderByPostIdDesc(userId, pageRequest);
+        PageRequest pageRequest = PageRequest.of(page - 1, 10);
+        Page<Post> pagedPost = postRepository.findAllByUserIdAndStatusOrderByPostIdDesc(userId, "ACTIVE", pageRequest);
         pagedPost.forEach(post -> {
             Long bookmarkCnt = bookmarkRepository.countByPostId(post);
             Long commentCnt = commentRepository.countByPostIdAndUserId(post, userId);
@@ -147,6 +148,55 @@ public class PostService {
         });
 
         return PostPreviewListRes.builder().previewList(previewList).totalPage(pagedPost.getTotalPages()).build();
+    }
+
+    //게시글 수정
+    public PostContentRes editPost(String token, Long postId, EditPostContentReq editPostContent) {
+        Long userId = userService.getUserId(token);
+
+        //게시글 존재 여부 확인
+        Post post = postRepository.findByPostIdAndStatus(postId, "ACTIVE").orElseThrow(NotFoundPostIdException::new);
+
+        //자신의 게시글 확인
+        if (post.getUserId() != userId) {
+            throw new NotMyPostException();
+        }
+
+        //제목, 본문 수정
+        post.editPost(editPostContent);
+
+
+        //PostAttach 수정
+        List<PostAttach> imageList = postAttachService.saveAttach(post, editPostContent.getImageNameList());
+        post.setImageList(imageList);
+
+        //태그 수정
+        List<Tag> tagList = tagService.saveTag(editPostContent.getTagList());
+
+        //PostTag 수정
+        List<PostTag> postTagList = postTagService.savePostTag(post, tagList);
+        post.setTagList(postTagList);
+
+
+        return PostContentRes.builder().post(post).build();
+    }
+
+    //게시글 삭제
+    public PostContentRes deletePost(String token, Long postId) {
+        Long userId = userService.getUserId(token);
+
+        //게시글 존재 여부 확인
+        Post post = postRepository.findByPostIdAndStatus(postId, "ACTIVE").orElseThrow(NotFoundPostIdException::new);
+
+        //자신의 게시글 확인
+        if (post.getUserId() != userId) {
+            throw new NotMyPostException();
+        }
+
+        post.deletePost();
+
+        return PostContentRes.builder().post(post).build();
+
     }
 
 }

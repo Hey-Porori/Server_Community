@@ -29,4 +29,12 @@ public class PostReqDto {
         private List<Long> postIdList;
     }
 
+    @Getter
+    public static class EditPostContentReq {
+        private String title;
+        private String content;
+        private List<String> imageNameList;
+        private List<String> tagList;
+    }
+
 }

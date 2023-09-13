@@ -28,6 +28,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "+ sin(radians(:sLatitude)) * sin(radians(p.latitude)))) <=2 and p.created_at>=:yesterday and p.status = 'ACTIVE' order by p.post_id limit 10", nativeQuery = true)
     List<Post> findNearByPosts(@Param("sLatitude")Double sLatitude, @Param("sLongitude")Double sLongitude, @Param("yesterday") LocalDateTime yesterday);
 
-    Page<Post> findAllByUserIdOrderByPostIdDesc(Long userId, Pageable pageable);
+    Page<Post> findAllByUserIdAndStatusOrderByPostIdDesc(Long userId, String status, Pageable pageable);
 
 }
