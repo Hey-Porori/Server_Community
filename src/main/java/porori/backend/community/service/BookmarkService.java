@@ -7,9 +7,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import porori.backend.community.config.exception.bookmark.AlreadyBookmarkException;
 import porori.backend.community.config.exception.bookmark.MyPostException;
+import porori.backend.community.config.exception.bookmark.NotFoundBookmarkIdException;
+import porori.backend.community.config.exception.bookmark.NotMyBookmarkException;
 import porori.backend.community.config.exception.post.NotFoundPostIdException;
 import porori.backend.community.domain.Bookmark;
 import porori.backend.community.domain.Post;
+import porori.backend.community.dto.BookmarkResDto.*;
 import porori.backend.community.dto.PostResDto.*;
 import porori.backend.community.repository.BookmarkRepository;
 import porori.backend.community.repository.CommentRepository;
@@ -55,19 +58,35 @@ public class BookmarkService {
     }
 
     //북마크 목록 보기
-    public PostPreviewListRes getMyBookmarkList(String token, int page){
+    public BookmarkPreviewListRes getMyBookmarkList(String token, int page){
         Long userId = userService.getUserId(token);
 
-        ArrayList<PostPreview> previewList = new ArrayList<>();
+        ArrayList<BookmarkPreview> previewList = new ArrayList<>();
         //페이징 10개씩
         PageRequest pageRequest = PageRequest.of(page-1, 10);
-        Page<Post> pagedPost = bookmarkRepository.findAllByUserIdOrderByBookmarkIdDesc(userId, pageRequest);
-        pagedPost.forEach(post -> {
-            Long bookmarkCnt = bookmarkRepository.countByPostId(post);
-            Long commentCnt = commentRepository.countByPostIdAndUserId(post, userId);
-            previewList.add(PostPreview.builder().post(post).bookmarkCnt(bookmarkCnt).commentCnt(commentCnt).build());
+        Page<Bookmark> pagedBookmark = bookmarkRepository.findAllByUserIdOrderByBookmarkIdDesc(userId, pageRequest);
+        pagedBookmark.forEach(bookmark -> {
+            Long bookmarkCnt = bookmarkRepository.countByPostId(bookmark.getPostId());
+            Long commentCnt = commentRepository.countByPostIdAndUserId(bookmark.getPostId(), userId);
+            previewList.add(BookmarkPreview.builder().bookmark(bookmark).bookmarkCnt(bookmarkCnt).commentCnt(commentCnt).build());
         });
 
-        return PostPreviewListRes.builder().previewList(previewList).totalPage(pagedPost.getTotalPages()).build();
+        return BookmarkPreviewListRes.builder().previewList(previewList).totalPage(pagedBookmark.getTotalPages()).build();
+    }
+
+    //북마크 삭제하기
+    public BookmarkIdRes deleteBookmark(String token, Long bookmarkId){
+        Long userId = userService.getUserId(token);
+        //북마크 존재 여부 확인
+        Bookmark bookmark = bookmarkRepository.findByBookmarkId(bookmarkId).orElseThrow(NotFoundBookmarkIdException::new);
+
+
+        //내가 생성한 북마크인지 확인
+        if(bookmark.getUserId() != userId){
+            throw new NotMyBookmarkException();
+        }
+
+        bookmarkRepository.delete(bookmark);
+        return BookmarkIdRes.builder().bookmarkId(bookmarkId).build();
     }
 }

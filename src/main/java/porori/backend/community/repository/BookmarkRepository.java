@@ -14,6 +14,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     Long countByPostId(Post postId);
 
-    @Query("SELECT b.postId FROM Bookmark b WHERE b.userId = :userId order by b.bookmarkId desc")
-    Page<Post> findAllByUserIdOrderByBookmarkIdDesc(Long userId, Pageable pageable);
+    Page<Bookmark> findAllByUserIdOrderByBookmarkIdDesc(Long userId, Pageable pageable);
+    Optional<Bookmark> findByBookmarkId(Long bookmarkId);
 }

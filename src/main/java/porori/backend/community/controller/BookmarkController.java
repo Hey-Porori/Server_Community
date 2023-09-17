@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import porori.backend.community.config.BaseResponse;
-import porori.backend.community.dto.PostResDto;
+import porori.backend.community.dto.BookmarkResDto.*;
 import porori.backend.community.dto.PostResDto.*;
 import porori.backend.community.service.BookmarkService;
 
@@ -25,7 +25,13 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 목록 보기", description = "page=1부터 totalPage까지 북마크 목록을 10개씩 조회합니다.")
     @GetMapping("/bookmark/{page}")
-    public BaseResponse<PostResDto.PostPreviewListRes> getMyBookmarkList(@RequestHeader("Authorization") String token, @PathVariable int page){
+    public BaseResponse<BookmarkPreviewListRes> getMyBookmarkList(@RequestHeader("Authorization") String token, @PathVariable int page){
         return new BaseResponse<>(bookmarkService.getMyBookmarkList(token, page));
+    }
+
+    @Operation(summary = "북마크 삭제", description = "해당 bookmarkId의 북마크를 삭제합니다.")
+    @DeleteMapping("/bookmark/{bookmarkId}")
+    public BaseResponse<BookmarkIdRes> deleteBookmark(@RequestHeader("Authorization") String token, @PathVariable("bookmarkId") Long bookmarkId){
+        return new BaseResponse<>(bookmarkService.deleteBookmark(token, bookmarkId));
     }
 }
