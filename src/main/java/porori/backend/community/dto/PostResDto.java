@@ -62,9 +62,10 @@ public class PostResDto {
         private String nickName;
         private String imageUrl;
         private String backgroundColor;
+        private boolean isBookmark;
 
         @Builder
-        public PostSwipeRes(Post post, CommunityUserInfo user) {
+        public PostSwipeRes(Post post, CommunityUserInfo user, boolean isBookmark) {
             this.postId = post.getPostId();
             this.title = post.getTitle();
             this.content = post.getContent();
@@ -73,6 +74,7 @@ public class PostResDto {
             this.nickName = user.getNickname();
             this.imageUrl = user.getImage();
             this.backgroundColor = user.getBackgroundColor();
+            this.isBookmark = isBookmark;
         }
     }
 
@@ -87,10 +89,11 @@ public class PostResDto {
         private String nickName;
         private String imageUrl;
         private String backgroundColor;
+        private boolean isBookmark;
 
 
         @Builder
-        public PostDetailRes(Post post, CommunityUserInfo user) {
+        public PostDetailRes(Post post, CommunityUserInfo user, boolean isBookmark) {
             this.title = post.getTitle();
             this.content = post.getContent();
             this.location = post.getLocation();
@@ -100,6 +103,7 @@ public class PostResDto {
             this.nickName = user.getNickname();
             this.imageUrl = user.getImage();
             this.backgroundColor = user.getBackgroundColor();
+            this.isBookmark = isBookmark;
         }
     }
 

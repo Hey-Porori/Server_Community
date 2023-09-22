@@ -16,10 +16,7 @@ import porori.backend.community.config.exception.post.NotFoundPostIdException;
 import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -100,6 +97,8 @@ public class PostService {
 
     //게시글 스와이프 보기
     public List<PostSwipeRes> getPostsOnSwipe(String token, List<Long> postIdList) {
+        Long userId = userService.getUserId(token);
+
         //postId로 게시글 목록 가져오기
         List<Post> postsOnSwipe = new ArrayList<>();
         postIdList.forEach(postId -> {
@@ -118,19 +117,28 @@ public class PostService {
             communityUserInfoHashMap.put(communityUserInfo.getUserId(), communityUserInfo);
         });
 
-        return postsOnSwipe.stream().map(post -> PostSwipeRes.builder()
-                .post(post).
-                user(communityUserInfoHashMap.get(post.getUserId())).build()).collect(Collectors.toList());
+        return postsOnSwipe.stream().map(post -> {
+                    boolean isBoookmark = bookmarkRepository.findByPostIdAndUserId(post, userId).isPresent();
+                    return PostSwipeRes.builder()
+                            .post(post).
+                            user(communityUserInfoHashMap.get(post.getUserId()))
+                            .isBookmark(isBoookmark).build();
+                })
+                .collect(Collectors.toList());
     }
 
-    //게시글 상세보기
+    //게시글 상세보기 - 내 게시글인 경우 확인해보기
     public PostDetailRes getPostDetail(String token, Long postId) {
+        Long userId = userService.getUserId(token);
+
         Post post = postRepository.findByPostIdAndStatus(postId, "ACTIVE").orElseThrow(NotFoundPostIdException::new);
 
         List<CommunityUserInfo> userInfoBlock = userService.sendCommunitiesInfoRequest(
                 token, Collections.singletonList(post.getUserId()));
 
-        return PostDetailRes.builder().post(post).user(userInfoBlock.get(0)).build();
+        boolean isBoookmark = bookmarkRepository.findByPostIdAndUserId(post, userId).isPresent();
+
+        return PostDetailRes.builder().post(post).user(userInfoBlock.get(0)).isBookmark(isBoookmark).build();
     }
 
     //내 게시글 목록 보기
