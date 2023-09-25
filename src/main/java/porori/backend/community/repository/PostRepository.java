@@ -1,5 +1,7 @@
 package porori.backend.community.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,5 +27,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "* cos(radians(p.longitude) - radians(:sLongitude)) " +
             "+ sin(radians(:sLatitude)) * sin(radians(p.latitude)))) <=2 and p.created_at>=:yesterday and p.status = 'ACTIVE' order by p.post_id limit 10", nativeQuery = true)
     List<Post> findNearByPosts(@Param("sLatitude")Double sLatitude, @Param("sLongitude")Double sLongitude, @Param("yesterday") LocalDateTime yesterday);
+
+    Page<Post> findAllByUserIdAndStatusOrderByPostIdDesc(Long userId, String status, Pageable pageable);
 
 }

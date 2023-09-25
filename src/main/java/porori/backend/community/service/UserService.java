@@ -48,6 +48,8 @@ public class UserService {
                     .uri("/test/jwt")
                     .header("Authorization", token)
                     .retrieve()
+                    .onStatus(HttpStatus::is4xxClientError, clientResponse -> Mono.error(new TokenException()))
+                    .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new UserBadGateWayException()))
                     .toBodilessEntity()
                     .block();
         } catch (Exception e) {
